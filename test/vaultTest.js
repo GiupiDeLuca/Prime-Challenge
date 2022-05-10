@@ -29,8 +29,8 @@ contract("Vault", async (accounts) => {
 
 
     // assert balance of accounts[1] is indeed 1000
-    const balance2 = await vault.balances(accounts[1], primeTicker);
-    console.log("balance2", balance2.toNumber());
+    // const balance2 = await vault.balances(accounts[1], primeTicker);
+    // console.log("balance2", balance2.toNumber());
 
     // withdraw 1000 PRIME from vault
     // await vault.withdraw(primeTicker, { from: accounts[1] });

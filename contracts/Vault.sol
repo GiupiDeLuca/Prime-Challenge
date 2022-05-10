@@ -60,13 +60,12 @@ contract Vault is Ownable {
         external
         tokenExists(ticker)
     {
-        // IERC20 tokenInstance = IERC20(tokenMapping[ticker].tokenAddress);
         prime.transferFrom(msg.sender, address(this), _amount);
         balances[msg.sender][ticker] = balances[msg.sender][ticker].add(_amount);
     
-        // userDeposit[msg.sender][ticker].timeStamp = block.timestamp;
-        // userDeposit[msg.sender][ticker].client = msg.sender;
-        // userDeposit[msg.sender][ticker].withdrawn = false;
+        userDeposit[msg.sender][ticker].timeStamp = block.timestamp;
+        userDeposit[msg.sender][ticker].client = msg.sender;
+        userDeposit[msg.sender][ticker].withdrawn = false;
     }
 
     // set withdraw to true at some point
@@ -75,20 +74,20 @@ contract Vault is Ownable {
         tokenExists(ticker)
     {
         require(balances[msg.sender][ticker] > 0 , "cannot withdraw zero");
-        require(userDeposit[msg.sender][ticker].timeStamp < block.timestamp, "wrong timestamp");
+        require(userDeposit[msg.sender][ticker].timeStamp <= block.timestamp, "wrong timestamp");
         require(userDeposit[msg.sender][ticker].withdrawn == false, "already withdrawn");
         uint _timeDifference = block.timestamp.sub(userDeposit[msg.sender][ticker].timeStamp);
-        require(_timeDifference > 0, "cannot withdraw too soon"); // change to larger number later
+        require(_timeDifference >= 0, "cannot withdraw too soon"); // change to larger number later
         
         uint _balanceToWithdraw = balances[msg.sender][ticker];
         balances[msg.sender][ticker] = 0;
 
-        // uint _interestPerSecond = (_balanceToWithdraw.div(100)).div(31577600);
         uint _interestPerSecond = _balanceToWithdraw.div(3157760000);
         uint _interest = _interestPerSecond * _timeDifference;
 
         IERC20(tokenMapping[ticker].tokenAddress).transfer(msg.sender, _balanceToWithdraw);
         pusd.mint(msg.sender, _interest);
+        userDeposit[msg.sender][ticker].withdrawn = true;
     }
 
 }
